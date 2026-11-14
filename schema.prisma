@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  STAFF
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+}
+
+enum TripType {
+  HAJJ
+  UMRAH
+}
+
+model Company {
+  id           String         @id @default(uuid()) @db.Uuid
+  name         String
+  phone        String?
+  email        String?
+  isActive     Boolean        @default(true)
+  users        User[]
+  pilgrims     Pilgrim[]
+  trips        Trip[]
+  subscription Subscription?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  companyId    String?   @db.Uuid
+  company      Company?  @relation(fields: [companyId], references: [id])
+  email        String    @unique
+  passwordHash String
+  displayName  String
+  role         UserRole  @default(STAFF)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([companyId])
+}
+
+model Subscription {
+  id          String             @id @default(uuid()) @db.Uuid
+  companyId   String             @unique @db.Uuid
+  company     Company            @relation(fields: [companyId], references: [id])
+  plan        String
+  status      SubscriptionStatus @default(TRIALING)
+  trialEndsAt DateTime?
+  startsAt    DateTime           @default(now())
+  endsAt      DateTime?
+}
+
+model Pilgrim {
+  id           String   @id @default(uuid()) @db.Uuid
+  companyId    String   @db.Uuid
+  company      Company  @relation(fields: [companyId], references: [id])
+  fullName     String
+  phone        String?
+  passportNo   String?
+  createdAt    DateTime @default(now())
+
+  @@unique([companyId, passportNo])
+  @@index([companyId, fullName])
+}
+
+model Trip {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  company     Company  @relation(fields: [companyId], references: [id])
+  name        String
+  type        TripType
+  departureAt DateTime?
+  returnAt    DateTime?
+  capacity    Int?
+  createdAt   DateTime @default(now())
+
+  @@index([companyId, departureAt])
+}
