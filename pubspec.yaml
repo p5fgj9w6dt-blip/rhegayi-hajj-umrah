@@ -1,0 +1,18 @@
+name: rhegayi_hajj_umrah
+description: Kurdish Hajj and Umrah agency management app starter.
+publish_to: 'none'
+version: 0.1.0+1
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
